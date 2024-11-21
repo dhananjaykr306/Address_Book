@@ -1,11 +1,11 @@
-"""
+'''
     @Author: Dhananjay Kumar
-    @Date: 11-11-2024
+    @Date: 12-11-2024
     @Last Modified by: Dhananjay Kumar
-    @Last Modified time: 11-11-2024
+    @Last Modified time: 12-11-2024
     @Title : Address Book 
+'''
 
-"""
 import logger
 
 log = logger.logger_init('AddressBook')
@@ -76,6 +76,15 @@ class AddressBookMain:
         contact = Contact()
         self.address_book.add_contact(contact)
 
+    def add_multiple_contacts(self):
+        try:
+            num_contacts = int(input("Enter the number of contacts you want to add: "))
+            for _ in range(num_contacts):
+                print("\nAdding new contact:")
+                self.add_contact()
+        except ValueError:
+            print("Invalid input. Please enter a valid number.")
+
     def edit_contact(self):
         f_name = input("Enter the first name of the contact to edit: ")
         l_name = input("Enter the last name of the contact to edit: ")
@@ -90,19 +99,22 @@ class AddressBookMain:
         while True:
             print("\n--- Address Book ---")
             print("1. Add New Contact")
-            print("2. Edit Contact")
-            print("3. Display Contacts")
-            print("4. Delete Contact")
+            print("2. Add Multiple Contacts")
+            print("3. Edit Contact")
+            print("4. Display Contacts")
+            print("5. Delete Contact")
             print("0. Exit")
             choice = input("Enter your choice: ")
 
             if choice == "1":
                 self.add_contact()
             elif choice == "2":
-                self.edit_contact()
+                self.add_multiple_contacts()
             elif choice == "3":
-                self.address_book.display_contacts()
+                self.edit_contact()
             elif choice == "4":
+                self.address_book.display_contacts()
+            elif choice == "5":
                 self.delete_contact()
             elif choice == "0":
                 break
