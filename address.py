@@ -1,11 +1,3 @@
-'''
-    @Author: Dhananjay Kumar
-    @Date: 12-11-2024
-    @Last Modified by: Dhananjay Kumar
-    @Last Modified time: 12-11-2024
-    @Title : Address Book System with Multiple Address Books
-'''
-
 import logger
 from collections import defaultdict
 
@@ -121,18 +113,35 @@ class AddressBookSystem:
 
     def search_person_by_location(self, location):
         results = []
+        city_count = 0
+        state_count = 0
         for book_name, address_book in self.address_books.items():
             # Search by city and state
             contacts_in_city = address_book.search_by_city(location)
             contacts_in_state = address_book.search_by_state(location)
             results.extend([(book_name, contact) for contact in contacts_in_city + contacts_in_state])
 
+            city_count += len(contacts_in_city)
+            state_count += len(contacts_in_state)
+
         if results:
             log.info(f"Contacts found in {location}:")
             for book_name, contact in results:
                 log.info(f"[{book_name}] {contact}")
+            
+            # Log the count of contacts for city and state
+            if city_count > 0:
+                log.info(f"\nTotal contacts found in city '{location}': {city_count}")
+            else:
+                log.info(f"No contacts found in city '{location}'.")
+
+            if state_count > 0:
+                log.info(f"Total contacts found in state '{location}': {state_count}")
+            else:
+                log.info(f"No contacts found in state '{location}'.")
         else:
             log.info(f"No contacts found in '{location}'.")
+
 
 
 class AddressBookMain:
