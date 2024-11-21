@@ -277,8 +277,7 @@ class AddressBookMain:
                 break
             else:
                 print("Invalid choice.")
-
-
+                
 if __name__ == "__main__":
     address_book_system = AddressBookMain()
     address_book_system.run()
