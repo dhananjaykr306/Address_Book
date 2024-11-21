@@ -1,21 +1,11 @@
-'''
+"""
     @Author: Dhananjay Kumar
     @Date: 11-11-2024
     @Last Modified by: Dhananjay Kumar
     @Last Modified time: 11-11-2024
     @Title : Address Book 
 
-'''
-
-'''
-    @Author: Dhananjay Kumar
-    @Date: 11-11-2024
-    @Last Modified by: Dhananjay Kumar
-    @Last Modified time: 11-11-2024
-    @Title : Address Book 
-
-'''
-
+"""
 import logger
 
 log = logger.logger_init('AddressBook')
@@ -32,25 +22,76 @@ class Contact:
         self.email = input("Enter email address: ")
 
     def __str__(self):
-        return (f"{self.first_name} {self.last_name}, {self.address},{self.city}, {self.state}, {self.zip_code}, {self.phone}, {self.email}")
+        return (f"{self.first_name} {self.last_name}, {self.address}, {self.city}, {self.state}, {self.zip_code}, {self.phone}, {self.email}")
 
 class AddressBook:
-    """Stores and manages a collection of contacts."""
     def __init__(self):
         self.contacts = {}
 
     def add_contact(self, contact):
-        """Adds a new contact to the address book if it doesn't already exist."""
-        contact_key = f"{contact.first_name} {contact.last_name}"
-        
-        if contact_key not in self.contacts:
-            self.contacts[contact_key] = contact
+        key = f"{contact.first_name} {contact.last_name}"
+        if key not in self.contacts:
+            self.contacts[key] = contact
             log.info("Current contacts: %s", list(self.contacts.keys()))
-            log.info("Successfully added contact: %s", contact_key)
+            log.info(f"Contact {key} added successfully.")
         else:
-            log.info("Contact already exists: %s", contact_key)
+            log.info(f"Contact {key} already exists in the address book.")
+    
+    def edit_contact(self, f_name, l_name):
+        key = f"{f_name} {l_name}"
+        contact = self.contacts.get(key)
+        if contact:
+            print("Editing Contact Details (leave blank to keep current value):")
+            contact.address = input(f"New address [{contact.address}]: ") or contact.address
+            contact.city = input(f"New city [{contact.city}]: ") or contact.city
+            contact.state = input(f"New state [{contact.state}]: ") or contact.state
+            contact.zip_code = input(f"New ZIP code [{contact.zip_code}]: ") or contact.zip_code
+            contact.phone = input(f"New phone number [{contact.phone}]: ") or contact.phone
+            contact.email = input(f"New email [{contact.email}]: ") or contact.email
+            log.info(f"Contact {key} updated successfully.")
+        else:
+            log.info(f"Contact {key} not found in the address book.")
 
-# Create an instance
-address_book = AddressBook()
-new_contact = Contact()
-address_book.add_contact(new_contact)
+    def display_contacts(self):
+        if self.contacts:
+            for contact in self.contacts.values():
+                log.info(contact)
+        else:
+            log.info("No contacts in the address book.")
+
+class AddressBookMain:
+    def __init__(self):
+        self.address_book = AddressBook()
+
+    def add_contact(self):
+        contact = Contact()
+        self.address_book.add_contact(contact)
+
+    def edit_contact(self):
+        f_name = input("Enter the first name of the contact to edit: ")
+        l_name = input("Enter the last name of the contact to edit: ")
+        self.address_book.edit_contact(f_name, l_name)
+
+    def run(self):
+        while True:
+            print("\n--- Address Book ---")
+            print("1. Add New Contact")
+            print("2. Edit Contact")
+            print("3. Display Contacts")
+            print("0. Exit")
+            choice = input("Enter your choice: ")
+
+            if choice == "1":
+                self.add_contact()
+            elif choice == "2":
+                self.edit_contact()
+            elif choice == "3":
+                self.address_book.display_contacts()
+            elif choice == "0":
+                break
+            else:
+                print("Invalid choice. Please try again.")
+
+if __name__ == "__main__":
+    address_main = AddressBookMain()
+    address_main.run()
