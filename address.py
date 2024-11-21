@@ -1,3 +1,10 @@
+'''
+    @Author: Dhananjay Kumar
+    @Date: 12-11-2024
+    @Last Modified by: Dhananjay Kumar
+    @Last Modified time: 12-11-2024
+    @Title : Address Book System with Multiple Address Books, Duplicate Check, Location Search, and Count by City/State
+'''
 import logger
 from collections import defaultdict
 
@@ -46,11 +53,9 @@ class AddressBook:
             log.info(f"Contact {key} added successfully.")
 
     def search_by_city(self, city):
-        # Return a list of contacts in the specified city
         return self.city_dict.get(city, [])
 
     def search_by_state(self, state):
-        # Return a list of contacts in the specified state
         return self.state_dict.get(state, [])
 
     def edit_contact(self, f_name, l_name):
@@ -81,10 +86,16 @@ class AddressBook:
 
     def display_contacts(self):
         if self.contacts:
-            for contact in self.contacts.values():
+            # Sort contacts alphabetically by first name and last name
+            sorted_contacts = sorted(self.contacts.values(), key=lambda contact: (contact.first_name, contact.last_name))
+            for contact in sorted_contacts:
                 log.info(contact)
         else:
             log.info("No contacts in the address book.")
+
+    def sort_contacts(self):
+        """ Sort contacts alphabetically by first and last name. """
+        self.contacts = dict(sorted(self.contacts.items(), key=lambda item: (item[1].first_name, item[1].last_name)))
 
 
 class AddressBookSystem:
@@ -129,7 +140,6 @@ class AddressBookSystem:
             for book_name, contact in results:
                 log.info(f"[{book_name}] {contact}")
             
-            # Log the count of contacts for city and state
             if city_count > 0:
                 log.info(f"\nTotal contacts found in city '{location}': {city_count}")
             else:
@@ -141,7 +151,6 @@ class AddressBookSystem:
                 log.info(f"No contacts found in state '{location}'.")
         else:
             log.info(f"No contacts found in '{location}'.")
-
 
 
 class AddressBookMain:
@@ -194,6 +203,7 @@ class AddressBookMain:
                         print("3. Edit Contact")
                         print("4. Display Contacts")
                         print("5. Delete Contact")
+                        print("6. Sort Contacts Alphabetically")
                         print("0. Back to Main Menu")
                         sub_choice = input("Enter your choice: ")
 
@@ -207,6 +217,9 @@ class AddressBookMain:
                             address_book.display_contacts()
                         elif sub_choice == "5":
                             self.delete_contact_in_selected_book(address_book)
+                        elif sub_choice == "6":
+                            address_book.sort_contacts()
+                            log.info("Contacts sorted alphabetically.")
                         elif sub_choice == "0":
                             break
                         else:
