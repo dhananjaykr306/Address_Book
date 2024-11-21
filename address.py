@@ -3,10 +3,11 @@
     @Date: 12-11-2024
     @Last Modified by: Dhananjay Kumar
     @Last Modified time: 12-11-2024
-    @Title : Address Book System with Multiple Address Books, Duplicate Check, and Location Search
+    @Title : Address Book System with Multiple Address Books
 '''
 
 import logger
+from collections import defaultdict
 
 log = logger.logger_init('AddressBookSystem')
 
@@ -37,6 +38,9 @@ class Contact:
 class AddressBook:
     def __init__(self):
         self.contacts = {}
+        # Using defaultdict to store persons by city and state
+        self.city_dict = defaultdict(list)
+        self.state_dict = defaultdict(list)
 
     def add_contact(self, contact):
         if contact in self.contacts.values():
@@ -44,11 +48,18 @@ class AddressBook:
         else:
             key = f"{contact.first_name} {contact.last_name}"
             self.contacts[key] = contact
+            # Add contact to city and state dictionaries
+            self.city_dict[contact.city].append(contact)
+            self.state_dict[contact.state].append(contact)
             log.info(f"Contact {key} added successfully.")
 
-    def search_by_city_or_state(self, location):
-        # Return a list of contacts matching the city or state
-        return [contact for contact in self.contacts.values() if contact.city == location or contact.state == location]
+    def search_by_city(self, city):
+        # Return a list of contacts in the specified city
+        return self.city_dict.get(city, [])
+
+    def search_by_state(self, state):
+        # Return a list of contacts in the specified state
+        return self.state_dict.get(state, [])
 
     def edit_contact(self, f_name, l_name):
         key = f"{f_name} {l_name}"
@@ -68,7 +79,10 @@ class AddressBook:
     def delete_contact(self, f_name, l_name):
         key = f"{f_name} {l_name}"
         if key in self.contacts:
-            del self.contacts[key]
+            contact = self.contacts.pop(key)
+            # Remove contact from city and state dictionaries
+            self.city_dict[contact.city].remove(contact)
+            self.state_dict[contact.state].remove(contact)
             log.info(f"Contact {key} deleted successfully.")
         else:
             log.info(f"Contact {key} not found in the address book.")
@@ -108,9 +122,11 @@ class AddressBookSystem:
     def search_person_by_location(self, location):
         results = []
         for book_name, address_book in self.address_books.items():
-            contacts = address_book.search_by_city_or_state(location)
-            for contact in contacts:
-                results.append((book_name, contact))
+            # Search by city and state
+            contacts_in_city = address_book.search_by_city(location)
+            contacts_in_state = address_book.search_by_state(location)
+            results.extend([(book_name, contact) for contact in contacts_in_city + contacts_in_state])
+
         if results:
             log.info(f"Contacts found in {location}:")
             for book_name, contact in results:
@@ -197,6 +213,7 @@ class AddressBookMain:
                 break
             else:
                 print("Invalid choice. Please try again.")
+
 
 if __name__ == "__main__":
     address_main = AddressBookMain()
