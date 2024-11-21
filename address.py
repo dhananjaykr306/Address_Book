@@ -3,8 +3,9 @@
     @Date: 12-11-2024
     @Last Modified by: Dhananjay Kumar
     @Last Modified time: 12-11-2024
-    @Title : Address Book System with Multiple Address Books, Duplicate Check, Location Search, and Count by City/State
+    @Title : Address Book System with Multiple Address Books, Duplicate Check, and Location Search,sorting by name city, state, and zip code.
 '''
+
 import logger
 from collections import defaultdict
 
@@ -37,9 +38,10 @@ class Contact:
 class AddressBook:
     def __init__(self):
         self.contacts = {}
-        # Using defaultdict to store persons by city and state
+        # Using defaultdict to store persons by city, state, and zip_code
         self.city_dict = defaultdict(list)
         self.state_dict = defaultdict(list)
+        self.zip_dict = defaultdict(list)
 
     def add_contact(self, contact):
         if contact in self.contacts.values():
@@ -47,9 +49,10 @@ class AddressBook:
         else:
             key = f"{contact.first_name} {contact.last_name}"
             self.contacts[key] = contact
-            # Add contact to city and state dictionaries
+            # Add contact to city, state, and zip dictionaries
             self.city_dict[contact.city].append(contact)
             self.state_dict[contact.state].append(contact)
+            self.zip_dict[contact.zip_code].append(contact)
             log.info(f"Contact {key} added successfully.")
 
     def search_by_city(self, city):
@@ -57,6 +60,9 @@ class AddressBook:
 
     def search_by_state(self, state):
         return self.state_dict.get(state, [])
+
+    def search_by_zip(self, zip_code):
+        return self.zip_dict.get(zip_code, [])
 
     def edit_contact(self, f_name, l_name):
         key = f"{f_name} {l_name}"
@@ -77,9 +83,10 @@ class AddressBook:
         key = f"{f_name} {l_name}"
         if key in self.contacts:
             contact = self.contacts.pop(key)
-            # Remove contact from city and state dictionaries
+            # Remove contact from city, state, and zip dictionaries
             self.city_dict[contact.city].remove(contact)
             self.state_dict[contact.state].remove(contact)
+            self.zip_dict[contact.zip_code].remove(contact)
             log.info(f"Contact {key} deleted successfully.")
         else:
             log.info(f"Contact {key} not found in the address book.")
@@ -93,9 +100,23 @@ class AddressBook:
         else:
             log.info("No contacts in the address book.")
 
-    def sort_contacts(self):
-        """ Sort contacts alphabetically by first and last name. """
-        self.contacts = dict(sorted(self.contacts.items(), key=lambda item: (item[1].first_name, item[1].last_name)))
+    def sort_contacts_by_city(self):
+        """ Sort contacts by city. """
+        sorted_contacts = sorted(self.contacts.values(), key=lambda contact: contact.city)
+        for contact in sorted_contacts:
+            log.info(contact)
+
+    def sort_contacts_by_state(self):
+        """ Sort contacts by state. """
+        sorted_contacts = sorted(self.contacts.values(), key=lambda contact: contact.state)
+        for contact in sorted_contacts:
+            log.info(contact)
+
+    def sort_contacts_by_zip(self):
+        """ Sort contacts by ZIP code. """
+        sorted_contacts = sorted(self.contacts.values(), key=lambda contact: contact.zip_code)
+        for contact in sorted_contacts:
+            log.info(contact)
 
 
 class AddressBookSystem:
@@ -126,14 +147,17 @@ class AddressBookSystem:
         results = []
         city_count = 0
         state_count = 0
+        zip_count = 0
         for book_name, address_book in self.address_books.items():
-            # Search by city and state
+            # Search by city, state, or zip code
             contacts_in_city = address_book.search_by_city(location)
             contacts_in_state = address_book.search_by_state(location)
-            results.extend([(book_name, contact) for contact in contacts_in_city + contacts_in_state])
+            contacts_in_zip = address_book.search_by_zip(location)
+            results.extend([(book_name, contact) for contact in contacts_in_city + contacts_in_state + contacts_in_zip])
 
             city_count += len(contacts_in_city)
             state_count += len(contacts_in_state)
+            zip_count += len(contacts_in_zip)
 
         if results:
             log.info(f"Contacts found in {location}:")
@@ -142,13 +166,10 @@ class AddressBookSystem:
             
             if city_count > 0:
                 log.info(f"\nTotal contacts found in city '{location}': {city_count}")
-            else:
-                log.info(f"No contacts found in city '{location}'.")
-
             if state_count > 0:
                 log.info(f"Total contacts found in state '{location}': {state_count}")
-            else:
-                log.info(f"No contacts found in state '{location}'.")
+            if zip_count > 0:
+                log.info(f"Total contacts found in ZIP code '{location}': {zip_count}")
         else:
             log.info(f"No contacts found in '{location}'.")
 
@@ -186,7 +207,8 @@ class AddressBookMain:
             print("1. Create New Address Book")
             print("2. Select Address Book")
             print("3. Display All Address Books")
-            print("4. Search Person by City or State")
+            print("4. Search Person by City, State, or Zip")
+            print("5. Sort Contacts")
             print("0. Exit")
             choice = input("Enter your choice: ")
 
@@ -204,6 +226,9 @@ class AddressBookMain:
                         print("4. Display Contacts")
                         print("5. Delete Contact")
                         print("6. Sort Contacts Alphabetically")
+                        print("7. Sort Contacts by City")
+                        print("8. Sort Contacts by State")
+                        print("9. Sort Contacts by ZIP")
                         print("0. Back to Main Menu")
                         sub_choice = input("Enter your choice: ")
 
@@ -218,25 +243,42 @@ class AddressBookMain:
                         elif sub_choice == "5":
                             self.delete_contact_in_selected_book(address_book)
                         elif sub_choice == "6":
-                            address_book.sort_contacts()
-                            log.info("Contacts sorted alphabetically.")
+                            address_book.display_contacts()
+                        elif sub_choice == "7":
+                            address_book.sort_contacts_by_city()
+                        elif sub_choice == "8":
+                            address_book.sort_contacts_by_state()
+                        elif sub_choice == "9":
+                            address_book.sort_contacts_by_zip()
                         elif sub_choice == "0":
                             break
                         else:
-                            print("Invalid choice. Please try again.")
-                else:
-                    print("Selected address book not found.")
+                            print("Invalid choice.")
             elif choice == "3":
                 self.system.display_address_books()
             elif choice == "4":
-                location = input("Enter the city or state to search for contacts: ")
+                location = input("Enter the city, state, or ZIP code to search for: ")
                 self.system.search_person_by_location(location)
+            elif choice == "5":
+                print("\n--- Sorting Contacts ---")
+                print("1. Sort by City")
+                print("2. Sort by State")
+                print("3. Sort by ZIP code")
+                sort_choice = input("Enter your choice: ")
+                if sort_choice == "1":
+                    address_book.sort_contacts_by_city()
+                elif sort_choice == "2":
+                    address_book.sort_contacts_by_state()
+                elif sort_choice == "3":
+                    address_book.sort_contacts_by_zip()
+                else:
+                    print("Invalid choice.")
             elif choice == "0":
                 break
             else:
-                print("Invalid choice. Please try again.")
+                print("Invalid choice.")
 
 
 if __name__ == "__main__":
-    address_main = AddressBookMain()
-    address_main.run()
+    address_book_system = AddressBookMain()
+    address_book_system.run()
